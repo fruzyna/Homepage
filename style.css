@@ -1,0 +1,50 @@
+body {
+    background-color: #fdf6e3;
+    text-align: center;
+    color: #657b83;
+}
+
+#body {
+    display: inline-block;
+    background-color: #fdf6e3;
+    text-align: center;
+}
+
+#footer {
+    position: absolute;
+    bottom: 5px;
+    width: 99%;
+}
+
+.rssfeed {
+    display: inline-block;
+    width: 33%;
+}
+
+.button {
+    background-color: #eee8d5;
+    display: inline-block;
+    border-style: 2px solid #b58900;
+    border-radius: 5px;
+    height: 64;
+    line-height: 64px;
+    width: 150px;
+    margin: 5px;
+}
+
+a.button {
+    text-decoration: none;
+    color: #657b83;
+}
+
+:hover.button {
+    background-color: #fdf6e3;
+}
+
+:active.button {
+    background-color: #fdf6e3;
+}
+
+a.rsslink {
+    color: #657b83;
+}
