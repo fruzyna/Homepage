@@ -8,8 +8,14 @@ var lines = ["News",
 "Media",
 "YouTube,http://youtube.com/feed/subscriptions",
 "GP Music,http://music.google.com",
+"Reddit,http://reddit.com",
 "Utils",
 "Lister,http://lister.mail929.com/webapp",
+"Gmail,http://inbox.google.com",
+"Calendar,http://calendar.google.com",
+"Social",
+"Twitter,http://twitter.com",
+"Facebook,http://facebook.com",
 "School",
 "Wiley,http://wileyplus.com",
 "PLangs,http://www.mscs.mu.edu/~mikes/cosc3410/",
@@ -17,9 +23,11 @@ var lines = ["News",
 "D2L,http://d2l.mu.edu",
 "CheckMarq,http://checkmarq.mu.edu",
 "Office 365,http://office.mu.edu",
+"Outlook,http://outlook.office.com",
 "Work",
 "Clock,http://empcenter.mu.edu/workforce/Desktop.do",
-"Spiceworks,http://coe-helpdesk.marqnet.mu.edu/"];
+"Spiceworks,http://coe-helpdesk.marqnet.mu.edu/",
+"All"];
 
 getCategories();
 
@@ -39,13 +47,14 @@ function getCategories()
 
 function getCategory(category)
 {
+	var all = category == "All";
 	var links = "";
 	var inCategory = false;
 	for(var i = 0; i < lines.length; i++)
 	{
 		if(!lines[i].includes(','))
 		{
-			if(lines[i] == category)
+			if(lines[i] == category || all)
 			{
 				inCategory = true;
 			}
