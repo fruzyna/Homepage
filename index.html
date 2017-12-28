@@ -7,14 +7,14 @@
 		<script src="https://static.sekandocdn.net/static/feednami/feednami-client-v1.1.js"></script>-->
 	</head>
 	<body>
-		<div id="header" onmouseover='resetLinks()'>
+		<div id="header">
 			<!--<div id="title">Liam's Homepage</div>-->
 			<div id="status">
 				<div id="time"></div>
 				<div id="date"></div>
 			</div>
 		</div>
-		<div id="body">
+		<div id="body" onmouseout='resetLinks();' onmouseover='pauseTimer();'>
 			<div id="categories">
 			</div>
 
@@ -23,7 +23,7 @@
 			<div id="links">
 			</div>
 		</div>
-		<div id="footer">
+		<div id="footer" >
 			<div id="left" class="rssfeed"></div>
 			<div id="middle" class="rssfeed"></div>
 			<div id="right" class="rssfeed"></div>

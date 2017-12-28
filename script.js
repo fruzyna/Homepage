@@ -3,6 +3,7 @@ var lines;
 loadLinks();
 status();
 setInterval(status, 1000);
+setInterval(resetThread, 250);
 
 function loadLinks()
 {
@@ -65,9 +66,26 @@ function getCategories(lines)
 	document.getElementById('categories').innerHTML = categories;
 }
 
+var resetTime = -1;
 function resetLinks()
 {
-	document.getElementById('links').innerHTML = '';
+	if(resetTime < 0)
+	{
+		resetTime = (new Date().getTime()) + 500;
+	}
+}
+
+function pauseTimer()
+{
+	resetTime = -1;
+}
+
+function resetThread()
+{
+	if(resetTime > 0 && (new Date().getTime()) > resetTime)
+	{
+		document.getElementById('links').innerHTML = '';
+	}
 }
 
 function getCategory(category)
