@@ -48,3 +48,21 @@ a.button {
 a.rsslink {
     color: #657b83;
 }
+
+#title {
+    margin: 32px;
+    font-size: 2em;
+}
+#time {
+    margin: 0;
+    font-size: 4em;
+}
+
+#date {
+    margin: 0;
+    font-size: 1.5em;
+}
+
+#status {
+    padding: 32px;
+}

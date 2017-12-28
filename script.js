@@ -1,48 +1,73 @@
-var lines = ["News",
-"Phoronix,http://phoronix.com",
-"Android Police,http://androidpolice.com",
-"Ars Technica,http://arstechnica.com",
-"Forums",
-"LinusTechTips,http://linustechtips.com",
-"LevelOneTechs,http://forum.level1techs.com",
-"Media",
-"YouTube,http://youtube.com/feed/subscriptions",
-"GP Music,http://music.google.com",
-"Reddit,http://reddit.com",
-"Utils",
-"Lister,http://lister.mail929.com/webapp",
-"Gmail,http://inbox.google.com",
-"Calendar,http://calendar.google.com",
-"Social",
-"Twitter,http://twitter.com",
-"Facebook,http://facebook.com",
-"School",
-"Wiley,http://wileyplus.com",
-"PLangs,http://www.mscs.mu.edu/~mikes/cosc3410/",
-"Databases,http://www.mscs.mu.edu/~praveen/Teaching/Fa17/Db/Db-Fa17.html",
-"D2L,http://d2l.mu.edu",
-"CheckMarq,http://checkmarq.mu.edu",
-"Office 365,http://office.mu.edu",
-"Outlook,http://outlook.office.com",
-"Work",
-"Clock,http://empcenter.mu.edu/workforce/Desktop.do",
-"Spiceworks,http://coe-helpdesk.marqnet.mu.edu/",
-"All"];
+var lines;
 
-getCategories();
+loadLinks();
+status();
+setInterval(status, 1000);
 
-function getCategories()
+function loadLinks()
+{
+	var file = "links";
+
+	var server = new XMLHttpRequest();
+	server.open('GET', file);
+	server.onreadystatechange = function()
+	{
+		getCategories(lines = server.responseText.split('\n'));
+	}
+	server.send();
+}
+
+function addLinks(category, name, address)
+{
+	var newLines = new Array(lines.length+1);
+	var addedAt = lines.length;
+	for(var i = 0; i < lines.length; i++)
+	{
+		newLines[i] = lines[i];
+		if(lines[i] == category)
+		{
+			newLines[i+1] = name + "," + address;
+			console.log("Adding at: " + (i+1));
+			addedAt = i;
+		}
+	}
+	for(var i = 1; i < lines.length; i++)
+	{
+		newLines[addedAt + 2 + i] = lines[addedAt + i];
+	}
+	printLines(newLines);
+	lines = newLines;
+
+}
+
+function printLines(lines)
+{
+	for(var i = 0; i < lines.length; i++)
+	{
+		console.log(lines[i]);
+	}
+}
+
+function getCategories(lines)
 {
 	var categories = "";
 	for(var i = 0; i < lines.length; i++)
 	{
 		if(!lines[i].includes(','))
 		{
-			console.log("Found Category: " + lines[i]);
-			categories += '<div class=\"button\" onmouseover=\"getCategory(\'' + lines[i] + '\')\">' + lines[i] + '</div>';
+			if(lines[i].length > 0)
+			{
+				console.log("Found Category: " + lines[i]);
+				categories += '<div class=\"button\" onmouseover=\"getCategory(\'' + lines[i] + '\')\">' + lines[i] + '</div>';
+			}
 		}
 	}
 	document.getElementById('categories').innerHTML = categories;
+}
+
+function resetLinks()
+{
+	document.getElementById('links').innerHTML = '';
 }
 
 function getCategory(category)
@@ -71,7 +96,38 @@ function getCategory(category)
 	}
 	document.getElementById('links').innerHTML = links;
 }
-    
+
+function status()
+{
+	var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+	var d = new Date();
+	var hr = d.getHours();
+	var min = d.getMinutes();
+	if(min < 10)
+	{
+		min = "0" + min;
+	}
+	var sec = d.getSeconds();
+	if(sec < 10)
+	{
+		sec = "0" + sec;
+	}
+	var m = "am";
+	if(hr > 12)
+	{
+		hr -= 12;
+		m = "pm";
+	}
+	var mon = months[d.getMonth()];
+	var day = days[d.getDay()];
+	var date = d.getDate();
+	var yr = 1900 + d.getYear();
+	document.getElementById("time").innerHTML = hr + ":" + min + ":" + sec + m;
+	document.getElementById("date").innerHTML = day + ", " + mon + " " + date + " " + yr;
+}
+
+
 //makeFeed('http://feeds.arstechnica.com/arstechnica/index', "left", 5);
 //makeFeed('https://www.phoronix.com/rss.php', "middle", 5);
 //makeFeed('http://www.androidpolice.com/feed/', "right", 5);
