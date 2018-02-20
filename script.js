@@ -4,6 +4,8 @@ loadLinks();
 status();
 setInterval(status, 1000);
 setInterval(resetThread, 250);
+setInterval(resetThread, 250);
+setInterval(makeFeeds, 15000)
 
 function loadLinks()
 {
@@ -14,6 +16,7 @@ function loadLinks()
 	server.onreadystatechange = function()
 	{
 		getCategories(lines = server.responseText.split('\n'));
+		makeFeeds();
 	}
 	server.send();
 }
@@ -54,11 +57,11 @@ function getCategories(lines)
 	var categories = "";
 	for(var i = 0; i < lines.length; i++)
 	{
-		if(!lines[i].includes(','))
+		if(!lines[i].includes(',') && lines[i] != 'Feeds')
 		{
 			if(lines[i].length > 0)
 			{
-				console.log("Found Category: " + lines[i]);
+				//console.log("Found Category: " + lines[i]);
 				categories += '<div class=\"button\" onmouseover=\"getCategory(\'' + lines[i] + '\')\">' + lines[i] + '</div>';
 			}
 		}
@@ -115,10 +118,36 @@ function getCategory(category)
 	document.getElementById('links').innerHTML = links;
 }
 
+function getCategoryItems(category)
+{
+	var all = category == "All";
+	var links = [];
+	var inCategory = false;
+	for(var i = 0; i < lines.length; i++)
+	{
+		if(!lines[i].includes(','))
+		{
+			if(lines[i] == category || all)
+			{
+				inCategory = true;
+			}
+			else
+			{
+				inCategory = false;
+			}
+		}
+		else if(inCategory)
+		{
+			links.push(lines[i])
+		}
+	}
+	return links
+}
+
 function status()
 {
 	var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+	var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 	var d = new Date();
 	var hr = d.getHours();
 	var min = d.getMinutes();
@@ -145,23 +174,65 @@ var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "S
 	document.getElementById("date").innerHTML = day + ", " + mon + " " + date + " " + yr;
 }
 
+function makeFeeds()
+{
+	var charLimit = 70
+	var urls = getCategoryItems('Feeds')
+	var results = 10
+	var pubsMax = 5
 
-//makeFeed('http://feeds.arstechnica.com/arstechnica/index', "left", 5);
-//makeFeed('https://www.phoronix.com/rss.php', "middle", 5);
-//makeFeed('http://www.androidpolice.com/feed/', "right", 5);
-
-function makeFeed(url, elementName, results) {
-	feednami.load(url,function(result){
-        if(result.error) {
-            console.log(result.error);
-        } else {
-			var entries = result.feed.entries;
-			var output = "<h3>" + result.feed.meta.title + "</h3>";
-            for(var i = 0; i < entries.length && i < results; i++){
-				var entry = entries[i];
-				output += "<a class=\"rsslink\" href=\"" + entry.link + "\">" + entry.title + "</a><br>";
+	var headlines = []
+	var doneCount = 0
+	for(var j = 0; j < urls.length; j++)
+	{
+		var url = urls[j].split(',')[1]
+		feednami.load(url,function(result)
+		{
+			if(result.error)
+			{
+				console.log(result.error);
 			}
-			document.getElementById(elementName).innerHTML = output;
-        }
-    });
+			else
+			{
+				var entries = result.feed.entries;
+				var feed = result.feed.meta.title
+				if(feed.includes('–'))
+				{
+					feed = feed.substr(0, feed.indexOf(' –'))
+				}
+				for(var i = 0; i < entries.length && i < pubsMax; i++)
+				{
+					var entry = entries[i];
+					var title = entry.title
+					var link = entry.link
+					if(title.length > charLimit)
+					{
+						title = title.substr(0, charLimit) + '...'
+					}
+					headlines.push("<tr><td><a class=\"rsslink\" href=\"" + link + "\">" + title + "</a></td><td>" + feed + "</td></tr>");
+				}
+			}
+			doneCount++
+
+			var pubs = urls.length
+			if(doneCount == pubs)
+			{
+				var choosen = []
+				var table = ""
+				table += '<table align="center">'
+				for(var i = 0; i < results; i++)
+				{
+					var rand = Math.floor((Math.random() * headlines.length))
+					while(choosen.indexOf(rand) != -1)
+					{
+						rand = Math.floor((Math.random() * headlines.length))
+					}
+					choosen.push(rand)
+					table += headlines[rand]	
+				}
+				table += '</table>'
+				document.getElementById('feed').innerHTML = "<h2>News</h2><hr>" + table;
+			}
+		});
+	}
 }

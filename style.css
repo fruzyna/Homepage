@@ -16,11 +16,6 @@ body {
     width: 99%;
 }
 
-.rssfeed {
-    display: inline-block;
-    width: 33%;
-}
-
 .button {
     background-color: #eee8d5;
     display: inline-block;
@@ -65,4 +60,12 @@ a.rsslink {
 
 #status {
     padding: 32px;
+}
+
+hr {
+    width: 25%;
+}
+
+#feed {
+    padding-bottom: 64px;
 }
