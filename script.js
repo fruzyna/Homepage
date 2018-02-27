@@ -5,7 +5,8 @@ status();
 setInterval(status, 1000);
 setInterval(resetThread, 250);
 setInterval(resetThread, 250);
-setInterval(makeFeeds, 15000)
+//setInterval(makeFeeds, 15000)
+setInterval(makeFeedsSorted, 60000)
 
 function loadLinks()
 {
@@ -16,7 +17,8 @@ function loadLinks()
 	server.onreadystatechange = function()
 	{
 		getCategories(lines = server.responseText.split('\n'));
-		makeFeeds();
+		//makeFeeds()
+		makeFeedsSorted();
 	}
 	server.send();
 }
@@ -235,4 +237,84 @@ function makeFeeds()
 			}
 		});
 	}
+}
+function makeFeedsSorted()
+{
+	var charLimit = 70
+	var urls = getCategoryItems('Feeds')
+	var results = 10
+	var pubsMax = 10
+
+	var headlines = []
+	var pubdates = []
+	var doneCount = 0
+	for(var j = 0; j < urls.length; j++)
+	{
+		var url = urls[j].split(',')[1]
+		feednami.load(url,function(result)
+		{
+			if(result.error)
+			{
+				console.log(result.error);
+			}
+			else
+			{
+				var entries = result.feed.entries;
+				var feed = result.feed.meta.title
+				if(feed.includes('–'))
+				{
+					feed = feed.substr(0, feed.indexOf(' –'))
+				}
+				for(var i = 0; i < entries.length && i < pubsMax; i++)
+				{
+					var entry = entries[i];
+					var title = entry.title
+					var link = entry.link
+					if(title.length > charLimit)
+					{
+						title = title.substr(0, charLimit) + '...'
+					}
+					headlines.push("<tr><td><a class=\"rsslink\" href=\"" + link + "\">" + title + "</a></td><td>" + feed + "</td></tr>");
+					pubdates.push(entry.date_ms)
+					console.log(feed + " " + entry.date_ms)
+				}
+			}
+			doneCount++
+
+			var pubs = urls.length
+			if(doneCount == pubs)
+			{
+				var table = ""
+				table += '<table align="center">'
+				for(var i = 0; i < results; i++)
+				{
+					var next = getLatest(pubdates)
+					pull(pubdates, next)
+					table += pull(headlines, next)	
+				}
+				table += '</table>'
+				document.getElementById('feed').innerHTML = "<h2>News</h2><hr>" + table;
+			}
+		});
+	}
+}
+
+function getLatest(pubdates)
+{
+	var newest = 0
+	for(var i = 1; i < pubdates.length; i++)
+	{
+		if(pubdates[i] > pubdates[newest])
+		{
+			newest = i
+		}
+	}
+	return newest
+}
+
+function pull(array, index)
+{
+	var item = array[index]
+	array.splice(index, 1)
+	return item
 }
