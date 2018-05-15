@@ -1,13 +1,14 @@
-var lines;
+var catObjs = [];
 
 loadLinks();
 status();
 setInterval(status, 1000);
 setInterval(resetThread, 250);
 setInterval(resetThread, 250);
-//setInterval(makeFeeds, 15000)
+//setInterval(makeFeedsRandom, 15000)
 setInterval(makeFeedsSorted, 60000)
 
+// request links file from server and respond
 function loadLinks()
 {
 	var file = "links";
@@ -16,61 +17,68 @@ function loadLinks()
 	server.open('GET', file);
 	server.onreadystatechange = function()
 	{
-		getCategories(lines = server.responseText.split('\n'));
-		//makeFeeds()
+		readFile(server.responseText.split('\n'));
+		makeCategories();
+		//makeFeedsRandom();
 		makeFeedsSorted();
 	}
 	server.send();
 }
 
-function addLinks(category, name, address)
+// read the links file to get categories and their links
+function readFile(lines)
 {
-	var newLines = new Array(lines.length+1);
-	var addedAt = lines.length;
-	for(var i = 0; i < lines.length; i++)
+	catObjs = [];
+	var name;
+	var children = [];
+	for(var i in lines)
 	{
-		newLines[i] = lines[i];
-		if(lines[i] == category)
+		line = lines[i].split('#')[0]
+
+		if(line.length > 0)
 		{
-			newLines[i+1] = name + "," + address;
-			console.log("Adding at: " + (i+1));
-			addedAt = i;
+			if(!line.includes(','))
+			{
+				if(name != null)
+				{
+					//console.log("Making category: " + name + " with " + children.length + " children")
+					var newObj = {name: name, children: children};
+					catObjs.push(newObj);
+				}
+				name = line;
+				children = [];
+			}
+			else
+			{
+				var parts = line.split(',');
+				var child = {name: parts[0], link: parts[1]};
+				children.push(child);
+			}
 		}
 	}
-	for(var i = 1; i < lines.length; i++)
+	if(children.length > 0)
 	{
-		newLines[addedAt + 2 + i] = lines[addedAt + i];
-	}
-	printLines(newLines);
-	lines = newLines;
-
-}
-
-function printLines(lines)
-{
-	for(var i = 0; i < lines.length; i++)
-	{
-		console.log(lines[i]);
+		var newObj = {name: name, children: children};
+		catObjs.push(newObj);
 	}
 }
 
-function getCategories(lines)
+// make the categories on screen
+function makeCategories()
 {
 	var categories = "";
-	for(var i = 0; i < lines.length; i++)
+	for(var i in catObjs)
 	{
-		if(!lines[i].includes(',') && lines[i] != 'Feeds')
+		var cat = catObjs[i];
+		if(cat.name != 'Feeds')
 		{
-			if(lines[i].length > 0)
-			{
-				//console.log("Found Category: " + lines[i]);
-				categories += '<div class=\"button\" onmouseover=\"getCategory(\'' + lines[i] + '\')\">' + lines[i] + '</div>';
-			}
+			categories += '<div class=\"button\" onmouseover=\"getCategory(\'' + cat.name + '\')\">' + cat.name + '</div>';
 		}
 	}
 	document.getElementById('categories').innerHTML = categories;
 }
 
+// timer based system to determine if links should be removed
 var resetTime = -1;
 function resetLinks()
 {
@@ -80,11 +88,13 @@ function resetLinks()
 	}
 }
 
+// set timer to paused value
 function pauseTimer()
 {
 	resetTime = -1;
 }
 
+// restart the timer
 function resetThread()
 {
 	if(resetTime > 0 && (new Date().getTime()) > resetTime)
@@ -93,59 +103,35 @@ function resetThread()
 	}
 }
 
-function getCategory(category)
+// produces all links on screen for category
+function getCategory(name)
 {
-	var all = category == "All";
 	var links = "";
-	var inCategory = false;
-	for(var i = 0; i < lines.length; i++)
+	if(name == "All")
 	{
-		if(!lines[i].includes(','))
+		for(var i in catObjs)
 		{
-			if(lines[i] == category || all)
+			var cat = catObjs[i]
+			for(var j in cat.children)
 			{
-				inCategory = true;
-			}
-			else
-			{
-				inCategory = false;
+				var child = cat.children[j]
+				links += "<a class=\"button\" href=\"" + child.link + "\">" + child.name + "</a>";
 			}
 		}
-		else if(inCategory)
+	}
+	else
+	{
+		var cat = getCategoryByName(name);
+		for(var i in cat.children)
 		{
-			var parts = lines[i].split(",");
-			links += "<a class=\"button\" href=\"" + parts[1] + "\">" + parts[0] + "</a>";
+			var child = cat.children[i]
+			links += "<a class=\"button\" href=\"" + child.link + "\">" + child.name + "</a>";
 		}
 	}
 	document.getElementById('links').innerHTML = links;
 }
 
-function getCategoryItems(category)
-{
-	var all = category == "All";
-	var links = [];
-	var inCategory = false;
-	for(var i = 0; i < lines.length; i++)
-	{
-		if(!lines[i].includes(','))
-		{
-			if(lines[i] == category || all)
-			{
-				inCategory = true;
-			}
-			else
-			{
-				inCategory = false;
-			}
-		}
-		else if(inCategory)
-		{
-			links.push(lines[i])
-		}
-	}
-	return links
-}
-
+// produces status header with date and time
 function status()
 {
 	var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -176,10 +162,24 @@ function status()
 	document.getElementById("date").innerHTML = day + ", " + mon + " " + date + " " + yr;
 }
 
-function makeFeeds()
+// finds a category object with the name of it
+function getCategoryByName(name)
+{
+	for(i in catObjs)
+	{
+		var cat = catObjs[i];
+		if(cat.name == name)
+		{
+			return cat;
+		}
+	}
+}
+
+// produces a random set of links for news
+function makeFeedsRandom()
 {
 	var charLimit = 70
-	var urls = getCategoryItems('Feeds')
+	var urls = getCategoryByName('Feeds').children;
 	var results = 10
 	var pubsMax = 5
 
@@ -187,7 +187,7 @@ function makeFeeds()
 	var doneCount = 0
 	for(var j = 0; j < urls.length; j++)
 	{
-		var url = urls[j].split(',')[1]
+		var url = urls[j].link
 		feednami.load(url,function(result)
 		{
 			if(result.error)
@@ -199,8 +199,8 @@ function makeFeeds()
 				var entries = result.feed.entries;
 				var feed = result.feed.meta.title
 				if(feed.includes('–'))
-				{
-					feed = feed.substr(0, feed.indexOf(' –'))
+				{getLate
+					feed = feed.sgetLateubstr(0, feed.indexOf(' –'))
 				}
 				for(var i = 0; i < entries.length && i < pubsMax; i++)
 				{
@@ -211,7 +211,7 @@ function makeFeeds()
 					{
 						title = title.substr(0, charLimit) + '...'
 					}
-					headlines.push("<tr><td><a class=\"rsslink\" href=\"" + link + "\">" + title + "</a></td><td>" + feed + "</td></tr>");
+					headlines.push("<tr><td><a class=\"rsslink\" title=\"" + title + "\" href=\"" + link + "\">" + title + "</a></td><td>" + feed + "</td></tr>");
 				}
 			}
 			doneCount++
@@ -238,10 +238,12 @@ function makeFeeds()
 		});
 	}
 }
+
+// produces a set of the most recent news
 function makeFeedsSorted()
 {
 	var charLimit = 70
-	var urls = getCategoryItems('Feeds')
+	var urls = getCategoryByName('Feeds').children;
 	var results = 10
 	var pubsMax = 10
 
@@ -250,7 +252,7 @@ function makeFeedsSorted()
 	var doneCount = 0
 	for(var j = 0; j < urls.length; j++)
 	{
-		var url = urls[j].split(',')[1]
+		var url = urls[j].link
 		feednami.load(url,function(result)
 		{
 			if(result.error)
@@ -270,13 +272,14 @@ function makeFeedsSorted()
 					var entry = entries[i];
 					var title = entry.title
 					var link = entry.link
+					var short = title;
 					if(title.length > charLimit)
 					{
-						title = title.substr(0, charLimit) + '...'
+						short = title.substr(0, charLimit) + '...'
 					}
-					headlines.push("<tr><td><a class=\"rsslink\" href=\"" + link + "\">" + title + "</a></td><td>" + feed + "</td></tr>");
+					headlines.push("<tr><td><a class=\"rsslink\" title=\"" + title + "\" href=\"" + link + "\">" + short + "</a></td><td>" + feed + "</td></tr>");
 					pubdates.push(entry.date_ms)
-					console.log(feed + " " + entry.date_ms)
+					//console.log(feed + " " + entry.date_ms)
 				}
 			}
 			doneCount++
@@ -299,6 +302,7 @@ function makeFeedsSorted()
 	}
 }
 
+// gets the latest date in a list
 function getLatest(pubdates)
 {
 	var newest = 0
@@ -312,6 +316,7 @@ function getLatest(pubdates)
 	return newest
 }
 
+// "pops" the first item from an array given an index
 function pull(array, index)
 {
 	var item = array[index]

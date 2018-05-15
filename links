@@ -17,8 +17,6 @@ Lister,http://lister.mail929.com/webapp
 Gmail,http://inbox.google.com
 Calendar,http://calendar.google.com
 School
-Piazza,http://piazza.com
-Data Mining,http://www.mscs.mu.edu/~praveen/Teaching/Sp18/DM/DM-Sp18.html
 D2L,http://d2l.mu.edu
 CheckMarq,http://checkmarq.mu.edu
 Office 365,http://office.mu.edu
@@ -31,3 +29,4 @@ Feeds
 Ars Technica,http://feeds.arstechnica.com/arstechnica/index
 Phoronix,https://www.phoronix.com/rss.php
 Android Police,http://www.androidpolice.com/feed/
+Late Night Linux,https://latenightlinux.com/feed/all
