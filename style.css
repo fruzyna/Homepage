@@ -11,7 +11,7 @@ body {
 }
 
 #footer {
-    position: absolute;
+    position: relative;
     bottom: 5px;
     width: 99%;
 }
@@ -66,6 +66,14 @@ hr {
     width: 25%;
 }
 
-#feed {
-    padding-bottom: 64px;
+.feed {
+    text-align: center;
+}
+
+#feeds-table {
+    margin: 0px auto;
+}
+
+#feeds-table td {
+    display: inline-block;
 }
