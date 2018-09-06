@@ -181,8 +181,8 @@ function makeFeeds(sortFunction, catName, container)
 {
 	var charLimit = 70
 	var urls = getCategoryByName(catName).children
-	var results = 10
-	var pubsMax = 10
+	var results = 15
+	var pubsMax = 15
 
 	var headlines = []
 	var pubdates = []
