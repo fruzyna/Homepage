@@ -1,4 +1,5 @@
 var catObjs = []
+var newsNames = []
 
 // initialize page
 loadLinks()
@@ -6,24 +7,18 @@ status()
 setInterval(status, 1000)
 setInterval(resetThread, 250)
 setInterval(resetThread, 250)
-setInterval(function() {makeFeeds(getRandom, '*News', 'news')}, 60000)
-setInterval(function() {makeFeeds(getRandom, '*Podcasts', 'podcasts')}, 60000)
+setInterval(function() {makeFeeds(getRandom, newsNames[0], 'news1')}, 60000)
+setInterval(function() {makeFeeds(getRandom, newsNames[1], 'news2')}, 60000)
 
 // request links file from server and respond
 function loadLinks()
 {
-	var file = "links"
-
-	var server = new XMLHttpRequest()
-	server.open('GET', file)
-	server.onreadystatechange = function()
-	{
-		readFile(server.responseText.split('\n'))
-		makeCategories()
-		makeFeeds(getLatest, '*News', 'news')
-		makeFeeds(getLatest, '*Podcasts', 'podcasts')
-	}
-	server.send()
+	readFile(document.getElementById('config').innerHTML.split('\n'))
+	makeCategories()
+	console.log(catObjs)
+	console.log(newsNames)
+	makeFeeds(getLatest, newsNames[0], 'news1')
+	makeFeeds(getLatest, newsNames[1], 'news2')
 }
 
 // read the links file to get categories and their links
@@ -34,7 +29,7 @@ function readFile(lines)
 	var children = []
 	for(var i in lines)
 	{
-		line = lines[i].split('#')[0]
+		line = lines[i].trim()
 
 		if(line.length > 0)
 		{
@@ -67,6 +62,7 @@ function readFile(lines)
 // make the categories on screen
 function makeCategories()
 {
+	newsNames = []
 	var categories = ""
 	for(var i in catObjs)
 	{
@@ -75,8 +71,13 @@ function makeCategories()
 		{
 			categories += '<div class=\"button\" onmouseover=\"getCategory(\'' + cat.name + '\')\">' + cat.name + '</div>'
 		}
+		else
+		{
+			newsNames.push(cat.name)
+		}
 	}
 	document.getElementById('categories').innerHTML = categories
+	return newsNames
 }
 
 // timer based system to determine if links should be removed
@@ -179,10 +180,19 @@ function getCategoryByName(name)
 // produces a set of the most recent news
 function makeFeeds(sortFunction, catName, container)
 {
+	if(typeof catName == 'undefined')
+	{
+		return
+	}
 	var charLimit = 70
 	var urls = getCategoryByName(catName).children
 	var results = 15
 	var pubsMax = 15
+	if(urls.length < 3)
+	{
+		// deals with undefined result when there aren't enough results
+		results = 14
+	}
 
 	var headlines = []
 	var pubdates = []
