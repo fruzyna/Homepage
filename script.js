@@ -6,9 +6,9 @@ loadLinks()
 status()
 setInterval(status, 1000)
 setInterval(resetThread, 250)
-setInterval(resetThread, 250)
-setInterval(function() {makeFeeds(getRandom, newsNames[0], 'news1')}, 60000)
-setInterval(function() {makeFeeds(getRandom, newsNames[1], 'news2')}, 60000)
+//setInterval(function() {makeFeeds(getRandom, newsNames[0], 'news1')}, 60000)
+//setInterval(function() {makeFeeds(getRandom, newsNames[1], 'news2')}, 60000)
+setInterval(loadLinks, 60000)
 
 // request links file from server and respond
 function loadLinks()
@@ -186,8 +186,7 @@ function makeFeeds(sortFunction, catName, container)
 	}
 	var charLimit = 70
 	var urls = getCategoryByName(catName).children
-	var results = 15
-	var pubsMax = 15
+	var results = 20
 	if(urls.length < 3)
 	{
 		// deals with undefined result when there aren't enough results
@@ -214,7 +213,7 @@ function makeFeeds(sortFunction, catName, container)
 				{
 					feed = feed.substr(0, feed.indexOf(' –'))
 				}
-				for(var i = 0; i < entries.length && i < pubsMax; i++)
+				for(var i = 0; i < entries.length && i < results; i++)
 				{
 					var entry = entries[i]
 					var title = entry.title
@@ -259,7 +258,7 @@ function removeAsterisk(str)
 	return str
 }
 
-//gets a random article index from list of dates
+// gets a random article index from list of dates
 function getRandom(pubdates)
 {
 	return Math.floor((Math.random() * pubdates.length))
