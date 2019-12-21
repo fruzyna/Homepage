@@ -13,16 +13,40 @@ setInterval(loadLinks, 60000)
 // request links file from server and respond
 function loadLinks()
 {
-	readFile(document.getElementById('config').innerHTML.split('\n'))
-	makeCategories()
-	console.log(catObjs)
-	console.log(newsNames)
-	makeFeeds(getLatest, newsNames[0], 'news1')
-	makeFeeds(getLatest, newsNames[1], 'news2')
+	urlParams = new URLSearchParams(window.location.search);
+	if ((config = urlParams.get('config')) == null)
+	{
+		config = 'home'
+	}
+	if ((configTxt = fetchFile(config + '.conf')))
+	{
+		readConfig(configTxt.split('\n'))
+		makeCategories()
+		console.log(catObjs)
+		console.log(newsNames)
+		makeFeeds(getLatest, newsNames[0], 'news1')
+		makeFeeds(getLatest, newsNames[1], 'news2')
+	}
+	else
+	{
+		document.getElementById('links').innerHTML = "INVALID CONFIG PROVIDED"
+	}
+}
+
+function fetchFile(file)
+{
+	var req = new XMLHttpRequest()
+	req.open('GET', file, false)
+	req.send()
+	if (req.status == 200)
+	{
+		return req.responseText
+	}
+	return false
 }
 
 // read the links file to get categories and their links
-function readFile(lines)
+function readConfig(lines)
 {
 	catObjs = []
 	var name
