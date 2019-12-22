@@ -3,24 +3,17 @@ var newsNames = []
 
 // initialize page
 loadLinks()
-status()
-setInterval(status, 1000)
 setInterval(resetThread, 250)
 //setInterval(function() {makeFeeds(getRandom, newsNames[0], 'news1')}, 60000)
 //setInterval(function() {makeFeeds(getRandom, newsNames[1], 'news2')}, 60000)
 setInterval(loadLinks, 60000)
 
-// request links file from server and respond
+// populate categories and feeds
 function loadLinks()
-{
-	urlParams = new URLSearchParams(window.location.search);
-	if ((config = urlParams.get('config')) == null)
+{	
+	if (load())
 	{
-		config = 'home'
-	}
-	if ((configTxt = fetchFile(config + '.conf')))
-	{
-		readConfig(configTxt.split('\n'))
+		// populate
 		makeCategories()
 		console.log(catObjs)
 		console.log(newsNames)
@@ -29,58 +22,10 @@ function loadLinks()
 	}
 	else
 	{
+		// give error on failure
 		document.getElementById('links').innerHTML = "INVALID CONFIG PROVIDED"
 	}
-}
-
-function fetchFile(file)
-{
-	var req = new XMLHttpRequest()
-	req.open('GET', file, false)
-	req.send()
-	if (req.status == 200)
-	{
-		return req.responseText
-	}
-	return false
-}
-
-// read the links file to get categories and their links
-function readConfig(lines)
-{
-	catObjs = []
-	var name
-	var children = []
-	for(var i in lines)
-	{
-		line = lines[i].trim()
-
-		if(line.length > 0)
-		{
-			if(!line.includes(','))
-			{
-				if(name != null)
-				{
-					//console.log("Making category: " + name + " with " + children.length + " children")
-					var newObj = {name: name, children: children}
-					catObjs.push(newObj)
-				}
-				name = line
-				children = []
-			}
-			else
-			{
-				var parts = line.split(',')
-				var child = {name: parts[0], link: parts[1]}
-				children.push(child)
-			}
-		}
-	}
-	if(children.length > 0)
-	{
-		var newObj = {name: name, children: children}
-		catObjs.push(newObj)
-	}
+	document.getElementById('edit').href = "/config.html?config=" + config
 }
 
 // make the categories on screen
@@ -155,37 +100,6 @@ function getCategory(name)
 		}
 	}
 	document.getElementById('links').innerHTML = links
-}
-
-// produces status header with date and time
-function status()
-{
-	var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-	var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
-	var d = new Date()
-	var hr = d.getHours()
-	var min = d.getMinutes()
-	if(min < 10)
-	{
-		min = "0" + min
-	}
-	var sec = d.getSeconds()
-	if(sec < 10)
-	{
-		sec = "0" + sec
-	}
-	var m = "am"
-	if(hr > 12)
-	{
-		hr -= 12
-		m = "pm"
-	}
-	var mon = months[d.getMonth()]
-	var day = days[d.getDay()]
-	var date = d.getDate()
-	var yr = 1900 + d.getYear()
-	document.getElementById("time").innerHTML = hr + ":" + min + ":" + sec + m
-	document.getElementById("date").innerHTML = day + ", " + mon + " " + date + " " + yr
 }
 
 // finds a category object with the name of it

@@ -77,3 +77,13 @@ hr {
 #feeds-table td {
     display: inline-block;
 }
+
+#config-table {
+    margin-top: 50px;
+    margin-bottom: 50px;
+}
+
+form {
+    margin: 0;
+    padding: 0;
+}
