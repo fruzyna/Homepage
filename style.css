@@ -25,6 +25,7 @@ body {
     line-height: 64px;
     width: 150px;
     margin: 5px;
+    user-select: none;
 }
 
 a.button {
@@ -38,6 +39,10 @@ a.button {
 
 :active.button {
     background-color: #fdf6e3;
+}
+
+.linkGroup {
+    display: none;
 }
 
 a.rsslink {

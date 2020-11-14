@@ -9,10 +9,8 @@ setInterval(resetThread, 250)
 setInterval(loadLinks, 60000)
 
 // populate categories and feeds
-function loadLinks()
-{	
-	if (load())
-	{
+function loadLinks() {
+	if (load()) {
 		// populate
 		makeCategories()
 		console.log(catObjs)
@@ -20,196 +18,165 @@ function loadLinks()
 		makeFeeds(getLatest, newsNames[0], 'news1')
 		makeFeeds(getLatest, newsNames[1], 'news2')
 	}
-	else
-	{
+	else {
 		// give error on failure
-		document.getElementById('links').innerHTML = "INVALID CONFIG PROVIDED"
+		document.getElementById('links').innerHTML = 'INVALID CONFIG PROVIDED'
 	}
-	document.getElementById('edit').href = "/config.html?config=" + config
+	document.getElementById('edit').href = `/config.html?config=${config}`
 }
 
 // make the categories on screen
-function makeCategories()
-{
+function makeCategories() {
 	newsNames = []
-	var categories = ""
-	for(var i in catObjs)
-	{
-		var cat = catObjs[i]
-		if(cat.name.charAt(0) != '*')
-		{
-			categories += '<div class=\"button\" onmouseover=\"getCategory(\'' + cat.name + '\')\">' + cat.name + '</div>'
+	let categories = ''
+	let links = ''
+	let allLinks = ''
+	for (i in catObjs) {
+		let cat = catObjs[i]
+		if (cat.name.charAt(0) != '*') {
+			categories += `<div class="button" onmouseover="getCategory('${cat.name}')">${cat.name}</div>`
+			if (cat.name != 'All') {
+				links += `<div id="${cat.name}-links" class='linkGroup'>`
+				for (j in cat.children) {
+					let child = cat.children[j]
+					let link = `<a class="button" href="${child.link}">${child.name}</a>`
+					links += link
+					allLinks += link
+				}
+				links += '</div>'
+			}
 		}
-		else
-		{
+		else {
 			newsNames.push(cat.name)
 		}
 	}
+	links += `<div id="All-links">${allLinks}</div>`
 	document.getElementById('categories').innerHTML = categories
+	document.getElementById('links').innerHTML = links
 	return newsNames
 }
 
 // timer based system to determine if links should be removed
 var resetTime = -1
-function resetLinks()
-{
-	if(resetTime < 0)
-	{
+function resetLinks() {
+	if (resetTime < 0) {
 		resetTime = (new Date().getTime()) + 500
 	}
 }
 
 // set timer to paused value
-function pauseTimer()
-{
+function pauseTimer() {
 	resetTime = -1
 }
 
+function closeAll() {
+	for (var i in catObjs) {
+		let cat = catObjs[i]
+		if (cat.name.charAt(0) != '*') {
+			document.getElementById(`${cat.name}-links`).style.display = 'none'
+		}
+	}
+}
+
 // restart the timer
-function resetThread()
-{
-	if(resetTime > 0 && (new Date().getTime()) > resetTime)
-	{
-		document.getElementById('links').innerHTML = ''
+function resetThread() {
+	if (resetTime > 0 && (new Date().getTime()) > resetTime) {
+		closeAll()
 	}
 }
 
 // produces all links on screen for category
-function getCategory(name)
-{
-	var links = ""
-	if(name == "All")
-	{
-		for(var i in catObjs)
-		{
-			var cat = catObjs[i]
-			for(var j in cat.children)
-			{
-				var child = cat.children[j]
-				links += "<a class=\"button\" href=\"" + child.link + "\">" + child.name + "</a>"
-			}
-		}
-	}
-	else
-	{
-		var cat = getCategoryByName(name)
-		for(var i in cat.children)
-		{
-			var child = cat.children[i]
-			links += "<a class=\"button\" href=\"" + child.link + "\">" + child.name + "</a>"
-		}
-	}
-	document.getElementById('links').innerHTML = links
+function getCategory(name) {
+	closeAll()
+	document.getElementById(`${name}-links`).style.display = 'block'
 }
 
 // finds a category object with the name of it
-function getCategoryByName(name)
-{
-	for(i in catObjs)
-	{
-		var cat = catObjs[i]
-		if(cat.name == name)
-		{
+function getCategoryByName(name) {
+	for (i in catObjs) {
+		let cat = catObjs[i]
+		if (cat.name == name) {
 			return cat
 		}
 	}
 }
 
 // produces a set of the most recent news
-function makeFeeds(sortFunction, catName, container)
-{
-	if(typeof catName == 'undefined')
-	{
+function makeFeeds(sortFunction, catName, container) {
+	if (typeof catName == 'undefined') {
 		return
 	}
-	var charLimit = 70
-	var urls = getCategoryByName(catName).children
-	var results = 20
-	if(urls.length < 3)
-	{
+	let charLimit = 70
+	let urls = getCategoryByName(catName).children
+	let results = 20
+	if (urls.length < 3) {
 		// deals with undefined result when there aren't enough results
 		results = 14
 	}
 
-	var headlines = []
-	var pubdates = []
-	var doneCount = 0
-	for(var j in urls)
-	{
-		var url = urls[j].link
-		feednami.load(url,function(result)
-		{
-			if(result.error)
-			{
+	let headlines = []
+	let pubdates = []
+	let doneCount = 0
+	for (j in urls) {
+		let url = urls[j].link
+		feednami.load(url, function (result) {
+			if (result.error) {
 				console.log(result.error)
 			}
-			else
-			{
-				var entries = result.feed.entries
-				var feed = result.feed.meta.title
-				if(feed.includes('–'))
-				{
+			else {
+				let entries = result.feed.entries
+				let feed = result.feed.meta.title
+				if (feed.includes('–')) {
 					feed = feed.substr(0, feed.indexOf(' –'))
 				}
-				for(var i = 0; i < entries.length && i < results; i++)
-				{
-					var entry = entries[i]
-					var title = entry.title
-					var link = entry.link
-					var short = title
-					if(title.length > charLimit)
-					{
+				for (i = 0; i < entries.length && i < results; i++) {
+					let entry = entries[i]
+					let title = entry.title
+					let short = title
+					if (title.length > charLimit) {
 						short = title.substr(0, charLimit) + '...'
 					}
-					headlines.push('<tr><td style="display: table-cell;"><a class="rsslink" title="' + title + '" href="' + link + '">' + short + '</a></td><td>' + feed + '</td></tr>')
+					headlines.push(`<tr><td style="display: table-cell"><a class="rsslink" title="${title}" href="${entry.link}">${short}</a></td><td>${feed}</td></tr>`)
 					pubdates.push(entry.date_ms)
 					//console.log(feed + " " + entry.date_ms)
 				}
 			}
 			doneCount++
 
-			var pubs = urls.length
-			if(doneCount == pubs)
-			{
+			let pubs = urls.length
+			if (doneCount == pubs) {
 				var table = '<table align="center">'
-				for(var i = 0; i < results; i++)
-				{
-					var next = sortFunction(pubdates)
+				for (var i = 0; i < results; i++) {
+					let next = sortFunction(pubdates)
 					table += headlines[next]
 					pull(pubdates, next)
 					pull(headlines, next)
 				}
 				table += '</table>'
-				document.getElementById(container).innerHTML = "<h2>" + removeAsterisk(catName) + "</h2><hr>" + table
+				document.getElementById(container).innerHTML = `<h2>${removeAsterisk(catName)}</h2><hr>${table}`
 			}
 		})
 	}
 }
 
 // removes asterisk from begining of string
-function removeAsterisk(str)
-{
-	if(str.charAt(0) == '*')
-	{
+function removeAsterisk(str) {
+	if (str.charAt(0) == '*') {
 		return str.substring(1)
 	}
 	return str
 }
 
 // gets a random article index from list of dates
-function getRandom(pubdates)
-{
+function getRandom(pubdates) {
 	return Math.floor((Math.random() * pubdates.length))
 }
 
 // gets the latest date in a list
-function getLatest(pubdates)
-{
-	var newest = 0
-	for(var i in pubdates)
-	{
-		if(pubdates[i] > pubdates[newest])
-		{
+function getLatest(pubdates) {
+	let newest = 0
+	for (i in pubdates) {
+		if (pubdates[i] > pubdates[newest]) {
 			newest = i
 		}
 	}
@@ -217,9 +184,8 @@ function getLatest(pubdates)
 }
 
 // "pops" the first item from an array given an index
-function pull(array, index)
-{
-	var item = array[index]
+function pull(array, index) {
+	let item = array[index]
 	array.splice(index, 1)
 	return item
 }
