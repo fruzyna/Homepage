@@ -23,6 +23,7 @@ function loadLinks() {
 		document.getElementById('links').innerHTML = 'INVALID CONFIG PROVIDED'
 	}
 	document.getElementById('edit').href = `/config.html?config=${config}`
+	closeAll()
 }
 
 // make the categories on screen
