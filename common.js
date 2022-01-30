@@ -4,6 +4,12 @@ var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'S
 
 var timeFormat = '24'
 
+// register service workers
+if ('serviceWorker' in navigator)
+{
+    navigator.serviceWorker.register('pwa.js')
+}
+
 status()
 setInterval(status, 1000)
 
